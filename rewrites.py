@@ -69,6 +69,8 @@ def rewrite(req_path):
     301 redirect to the nearest good match for `req_path`.
     Return 404 if no good match available.
     """
+    if len(AVAILABLE) == 0:
+        setup(get_args())
     match = nearest_match(req_path, AVAILABLE)
     if match is None:
         match = nearest_match(os.path.basename(req_path), BASENAMES.keys())
