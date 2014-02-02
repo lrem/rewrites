@@ -9,13 +9,19 @@ from flask import Flask
 import flask
 import argparse
 import os.path
+import re
 from difflib import get_close_matches
+try:
+    from itertools import izip_longest as zip_longest
+except:
+    from itertools import zip_longest
 
 APP = Flask(__name__)
 CUTOFF = 0.8
 AVAILABLE = []
 BASENAMES = {}
 NAMENOEXT = {}
+MANUAL = []
 
 
 def get_args(argv=None):
@@ -25,6 +31,7 @@ def get_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     add = parser.add_argument
     add('available', help="path to a file with available urls")
+    add('manual', help="path to a file with manual rewrite regexes")
     return parser.parse_args(argv)
 
 
@@ -45,6 +52,11 @@ def noext(path):
     return os.path.splitext(os.path.basename(path))[0]
 
 
+def grouper(iterable, n, fillvalue=None):
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
+
+
 def setup(args):
     """
     Set all the globals according to provided configuration.
@@ -53,6 +65,8 @@ def setup(args):
     for url in AVAILABLE:
         register_unique(BASENAMES, os.path.basename(url), url)
         register_unique(NAMENOEXT, noext(url), url)
+    for old, new in grouper(map(str.strip, open(args.manual).readlines()), 2):
+        MANUAL.append((re.compile(old), new))
 
 
 def nearest_match(string, collection):
@@ -75,6 +89,8 @@ def rewrite(req_path):
     """
     if len(AVAILABLE) == 0:
         setup(get_args())
+    for rule in MANUAL:
+        req_path = re.sub(rule[0], rule[1], req_path)
     match = nearest_match(req_path, AVAILABLE)
     if match is None:
         match = nearest_match(os.path.basename(req_path), BASENAMES.keys())
