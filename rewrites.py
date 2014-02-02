@@ -39,7 +39,7 @@ def noext(path):
     """
     Return base name of `path` without extension.
     """
-    return os.path.splitext(os.path.basename(path))
+    return os.path.splitext(os.path.basename(path))[0]
 
 def setup(args):
     """
