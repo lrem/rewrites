@@ -17,7 +17,8 @@ AVAILABLE = []
 BASENAMES = {}
 NAMENOEXT = {}
 
-def get_args(argv = None):
+
+def get_args(argv=None):
     """
     Process the command line, or supported, arguments.
     """
@@ -25,6 +26,7 @@ def get_args(argv = None):
     add = parser.add_argument
     add('available', help="path to a file with available urls")
     return parser.parse_args(argv)
+
 
 def register_unique(dictionary, key, value):
     """
@@ -35,11 +37,13 @@ def register_unique(dictionary, key, value):
     else:
         dictionary[key] = value
 
+
 def noext(path):
     """
     Return base name of `path` without extension.
     """
     return os.path.splitext(os.path.basename(path))[0]
+
 
 def setup(args):
     """
